@@ -35,6 +35,16 @@
 #endif
 
 
+//                       why
+#if defined(_MSC_VER) && !defined(__INTEL_COMPILER)
+    #define COMPILER_MSVC
+#elif defined(__clang__)
+    #define COMPILER_CLANG
+#elif defined(__GNUC__) || defined(__GNUG__)
+    #define COMPILER_GNUC
+#endif
+
+
 #include <stdint.h>
 
 typedef double   f64;
