@@ -4,7 +4,17 @@
 #define LENGTH_OF(x) (sizeof(x)/sizeof(*x))
 
 
-#ifdef _DEBUG
+//                                 why
+#if defined(_MSC_VER) && !defined(__INTEL_COMPILER)
+    #define COMPILER_MSVC
+#elif defined(__clang__)
+    #define COMPILER_CLANG
+#elif defined(__GNUC__) || defined(__GNUG__)
+    #define COMPILER_GNUC
+#endif
+
+
+#if defined(_DEBUG)
     #include <stdio.h>
     #include <stdlib.h>
 
@@ -14,15 +24,15 @@
         exit(666);                                                                  \
     } while (0)
 #else
-    #ifdef _WIN32
+    #if defined(COMPILER_MSVC)
         #define UNREACHABLE()   __assume(0)
-    #else
+    #elif defined(COMPILER_GNUC) || defined(COMPILER_CLANG)
         #define UNREACHABLE()   __builtin_unreachable()
     #endif
 #endif
 
 
-#ifdef _DEBUG
+#if defined(_DEBUG)
     #define ASSERT(...) \
     do { \
         if (!(__VA_ARGS__)) { \
@@ -32,16 +42,6 @@
     } while(0)
 #else
     #define ASSERT(...)
-#endif
-
-
-//                       why
-#if defined(_MSC_VER) && !defined(__INTEL_COMPILER)
-    #define COMPILER_MSVC
-#elif defined(__clang__)
-    #define COMPILER_CLANG
-#elif defined(__GNUC__) || defined(__GNUG__)
-    #define COMPILER_GNUC
 #endif
 
 
@@ -57,8 +57,8 @@ typedef uint16_t u16;
 typedef int16_t  i16;
 typedef uint8_t  u8;
 typedef int8_t   i8;
-typedef uint32_t b32; // semantic only
 
+typedef enum { false = 0, true = 1 } b32;
 
 
 #endif
