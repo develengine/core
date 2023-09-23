@@ -58,7 +58,7 @@ static inline mat4_t mat4_transpose(mat4_t m)
  *
  * Contributed by David Moore (See Mesa bug #6748)
  */
-static inline mat4_t matrix_inverse(mat4_t mat)
+static inline mat4_t mat4_inverse(mat4_t mat)
 {
     mat4_t res;
 
