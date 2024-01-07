@@ -217,7 +217,7 @@ static inline float vec4_length(vec4_t v)
     return sqrtf(v.x * v.x + v.y * v.y + v.z * v.z + v.w * v.w);
 }
 
-static vec4_t vec4_scale(vec4_t v, float s)
+static inline vec4_t vec4_scale(vec4_t v, float s)
 {
     return (vec4_t) {
         .x = v.x * s,
@@ -227,12 +227,12 @@ static vec4_t vec4_scale(vec4_t v, float s)
     };
 }
 
-static vec4_t vec4_normalize(vec4_t v)
+static inline vec4_t vec4_normalize(vec4_t v)
 {
     return vec4_scale(v, 1.0f / vec4_length(v));
 }
 
-static float vec4_dot(vec4_t a, vec4_t b)
+static inline float vec4_dot(vec4_t a, vec4_t b)
 {
     return a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w;
 }
@@ -288,12 +288,12 @@ static vec3_t vec3_scale(vec3_t v, float s)
     };
 }
 
-static vec3_t vec3_normalize(vec3_t v)
+static inline vec3_t vec3_normalize(vec3_t v)
 {
     return vec3_scale(v, 1.0f / vec3_length(v));
 }
 
-static float vec3_dot(vec3_t a, vec3_t b)
+static inline float vec3_dot(vec3_t a, vec3_t b)
 {
     return a.x * b.x + a.y * b.y + a.z * b.z;
 }
@@ -329,7 +329,7 @@ static inline float vec2_length(vec2_t v)
     return sqrtf(v.x * v.x + v.y * v.y);
 }
 
-static vec2_t vec2_scale(vec2_t v, float s)
+static inline vec2_t vec2_scale(vec2_t v, float s)
 {
     return (vec2_t) {
         .x = v.x * s,
@@ -337,12 +337,12 @@ static vec2_t vec2_scale(vec2_t v, float s)
     };
 }
 
-static vec2_t vec2_normalize(vec2_t v)
+static inline vec2_t vec2_normalize(vec2_t v)
 {
     return vec2_scale(v, 1.0f / vec2_length(v));
 }
 
-static float vec2_dot(vec2_t a, vec2_t b)
+static inline float vec2_dot(vec2_t a, vec2_t b)
 {
     return a.x * b.x + a.y * b.y;
 }
@@ -351,7 +351,7 @@ static float vec2_dot(vec2_t a, vec2_t b)
 // TODO: Remove and create a custom random number gen.
 #include <stdint.h>
 #include <stdlib.h>
-static float lina_rand_norm(void)
+static inline float lina_rand_norm(void)
 {
     return rand() / (float)RAND_MAX;
 }

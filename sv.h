@@ -4,6 +4,11 @@
 #include <stdio.h>
 #include <stdbool.h>
 
+// usage: printf("Name: "SV_FMT"\n", (int)sv_length(sv), sv.begin);
+#define SV_FMT "%.*s"
+
+#define SV_LIT(cstr_lit) ((sv_t) { .begin = cstr_lit, .end = cstr_lit + sizeof(cstr_lit) + 1 })
+
 typedef struct
 {
     char *begin, *end;

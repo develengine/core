@@ -334,6 +334,7 @@ char* b_stacktrace_to_string(b_stacktrace_handle h) {
 #include <unistd.h>
 #include <dlfcn.h>
 #include <string.h>
+#include <link.h>
 
 typedef struct b_stacktrace {
     void* trace[B_STACKTRACE_MAX_DEPTH];

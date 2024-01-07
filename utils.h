@@ -34,14 +34,18 @@
 
 #if defined(_DEBUG)
     #define ASSERT(...) \
-    do { \
-        if (!(__VA_ARGS__)) { \
-            fprintf(stderr, "%s:%d: Assert failed! (%s)\n", __FILE__, __LINE__, #__VA_ARGS__); \
-            exit(1); \
-        } \
-    } while(0)
+    ( \
+        !(__VA_ARGS__) ? ( \
+            fprintf(stderr, "%s:%d: Assert failed! (%s)\n", __FILE__, __LINE__, #__VA_ARGS__), \
+            exit(1), \
+            0 /* unreachable but compiler is epic */ \
+        ) \
+        : ( \
+            1 \
+        ) \
+    )
 #else
-    #define ASSERT(...)
+    #define ASSERT(...) (1)
 #endif
 
 
@@ -58,7 +62,11 @@ typedef int16_t  i16;
 typedef uint8_t  u8;
 typedef int8_t   i8;
 
-typedef enum { false = 0, true = 1 } b32;
+#if defined(false) || defined(true)
+    typedef uint32_t b32;
+#else
+    typedef enum { false = 0, true = 1 } b32;
+#endif
 
 
 #endif

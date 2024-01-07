@@ -1,12 +1,32 @@
 #ifndef IO_H_
 #define IO_H_
 
+#include <stddef.h>
+#include <stdio.h>
+#include <stdlib.h>
+
 /* Returns a pointer to allocated memory with the contents of file at `path`.
  * The size of the file gets written at `size_o`, unless it's NULL.
  * On error returns NULL pointer.
  */
-unsigned char *
-io_read_file(const char *path, size_t *size_o);
+unsigned char *io_read_file(const char *path, size_t *size_o);
+
+#define IO_FREAD(buffer, size, count, stream) \
+do { \
+    if (fread(buffer, size, count, stream) != (size_t)count) { \
+        fprintf(stderr, "%s:%d: fread failure! %s. exiting...\n", \
+                __FILE__, __LINE__, feof(stream) ? "EOF reached" : "Error"); \
+        exit(1); \
+    } \
+} while(0)
+
+#define IO_FWRITE(buffer, size, count, stream) \
+do { \
+    if (fwrite(buffer, size, count, stream) != (size_t)count) { \
+        fprintf(stderr, "%s:%d: fwrite failure! exiting...\n", __FILE__, __LINE__); \
+        exit(1); \
+    } \
+while (0)
 
 
 #if defined(IO_IMPLEMENTATION)
@@ -14,8 +34,8 @@ io_read_file(const char *path, size_t *size_o);
 #include <stdio.h>
 #include <stdlib.h>
 
-unsigned char *
-io_read_file(const char *path, size_t *size_o)
+
+unsigned char *io_read_file(const char *path, size_t *size_o)
 {
     FILE *file = NULL;
     unsigned char *contents = NULL;
