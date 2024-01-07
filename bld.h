@@ -1,6 +1,10 @@
 #ifndef BLD_H_
 #define BLD_H_
 
+/*
+ * Yeah, this is directly inspired by [tsoding's](https://github.com/tsoding) nobuild/nob.
+ */
+
 /* TODO:
  */
 
@@ -180,7 +184,7 @@ do {                                                                            
     }                                                                                   \
 } while (0)
 
-#define BLD_REBUILD_SELF(_argc, _argv) \
+#define BLD_TRY_REBUILD_SELF(_argc, _argv) \
 do { \
     int _res = bld_try_rebuild_self(__FILE__, _argc, _argv); \
     if (_res != -1) \
