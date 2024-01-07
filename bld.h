@@ -6,6 +6,8 @@
  */
 
 /* TODO:
+ * [ ] Delimeter aware contains and find.
+ * [ ] Run that extracts arguments from other by delimeter.
  */
 
 #include <string.h>
@@ -31,6 +33,12 @@ typedef struct
     char *data;
     size_t size, capacity;
 } bld_sb_t;
+
+typedef struct
+{
+    char **data;
+    size_t count, capacity;
+} bld_sa_t;
 
 
 int
@@ -106,7 +114,7 @@ int
 bld_contains(const char *str, int argc, char *argv[]);
 
 int
-bld_find(const char *str, int count, const char **list);
+bld_find(const char *str, int count, char **list);
 
 char *
 bld_join(const char *delim, int count, const char **list);
@@ -123,6 +131,24 @@ bld_cc_params_nt_async(const char **params);
 int
 bld_cc_params_nt(const char **params);
 
+pid_t
+bld_cc_pro_async(const char *out_name,
+                 char **src,   int src_count,
+                 char **libs,  int lib_count,
+                 char **inc,   int inc_count,
+                 char **defs,  int def_count,
+                 char **warns, int warn_count,
+                 char **raw,   int raw_count);
+
+int
+bld_cc_pro(const char *out_name,
+           char **src,   int src_count,
+           char **libs,  int lib_count,
+           char **inc,   int inc_count,
+           char **defs,  int def_count,
+           char **warns, int warn_count,
+           char **raw,   int raw_count);
+
 void
 bld_sb_append(bld_sb_t *sb, const char *s);
 
@@ -135,11 +161,20 @@ bld_sb_append_multiple_nt(bld_sb_t *sb, const char **sl);
 int
 bld_try_rebuild_self(char *self, int argc, char *argv[]);
 
+void
+bld_sa_push_multiple(bld_sa_t *sa, char **data, int count);
+
+void
+bld_sa_push_multiple_nt(bld_sa_t *sa, char **data);
+
 
 #define BLD_LEN(a) (sizeof(a) / sizeof(*(a)))
 
 #define BLD_SB_APPEND(sb, ...) \
     bld_sb_append_multiple_nt(sb, ((const char*[]) { __VA_ARGS__, NULL }))
+
+#define BLD_SA_PUSH(sa, ...) \
+    bld_sa_push_multiple_nt(&(sa), ((char*[]) { __VA_ARGS__, NULL }))
 
 #define BLD_CC(...) \
     bld_cc_params_nt(((const char*[]){ __VA_ARGS__, NULL }))
@@ -147,8 +182,14 @@ bld_try_rebuild_self(char *self, int argc, char *argv[]);
 #define BLD_CC_ASYNC(...) \
     bld_cc_params_nt_async(((const char*[]){ __VA_ARGS__, NULL }))
 
-#define BLD_GCC_WARNINGS     "-Wall -Wextra -pedantic"
-#define BLD_GCC_WARNINGS_OFF "-Wno-deprecated-declarations -Wno-missing-field-initializers"
+
+#define BLD_GCC_WARNINGS "-Wall", "-Wextra", "-Wpedantic", \
+                         "-Wno-deprecated-declarations", "-Wno-missing-field-initializers", \
+                         "-Wno-missing-braces"
+
+#define BLD_GCC_WARNINGS_PRO "all", "extra", "pedantic", \
+                             "no-deprecated-declarations", "no-missing-field-initializers", \
+                             "no-missing-braces"
 
 
 #define BLD_STRETCHY_T(data_type, size_type) struct { data_type *data; size_type count, capacity; }
@@ -325,6 +366,16 @@ bld_cc_params_async(const char **params, int param_count)
     bld_sb_append(&sb, "cc");
 
     for (int i = 0; i < param_count; ++i) {
+        int len = strlen(params[i]);
+
+        if (len > 3 && params[i][0] == '-') {
+            if (params[i][1] == 'R') {
+                bld_sb_append(&sb, " ");
+                bld_sb_append(&sb, params[i] + 2);
+                continue;
+            }
+        }
+
         bld_sb_append(&sb, " ");
         bld_sb_append(&sb, params[i]);
     }
@@ -479,6 +530,80 @@ bld_cc_params_nt(const char **params)
     return bld_wait_for(bld_cc_params_nt_async(params));
 }
 
+pid_t
+bld_cc_pro_async(const char *out_name,
+                 char **src,   int src_count,
+                 char **libs,  int lib_count,
+                 char **inc,   int inc_count,
+                 char **defs,  int def_count,
+                 char **warns, int warn_count,
+                 char **raw,   int raw_count)
+{
+    // NOTE: We do extra work, but it's easier to maintain,
+    //       since all you need to change to port to different compiler is
+    //       the `bld_cc_params_async` function.
+
+    bld_sa_t params = {0};
+
+    BLD_SA_PUSH(params, bld_strf("-o"));
+    // NOTE: Need to copy cuz we simply dealloc everithing and dont care.
+    BLD_SA_PUSH(params, bld_strf("%s", out_name));
+
+    for (int i = 0; i < src_count; ++i) {
+        BLD_SA_PUSH(params, bld_strf("%s", src[i]));
+    }
+
+    for (int i = 0; i < lib_count; ++i) {
+        BLD_SA_PUSH(params, bld_strf("-l%s", libs[i]));
+    }
+
+    for (int i = 0; i < inc_count; ++i) {
+        BLD_SA_PUSH(params, bld_strf("-I%s", inc[i]));
+    }
+
+    for (int i = 0; i < def_count; ++i) {
+        BLD_SA_PUSH(params, bld_strf("-D%s", defs[i]));
+    }
+
+    for (int i = 0; i < warn_count; ++i) {
+        BLD_SA_PUSH(params, bld_strf("-W%s", warns[i]));
+    }
+
+    for (int i = 0; i < raw_count; ++i) {
+        BLD_SA_PUSH(params, bld_strf("-R%s", raw[i]));
+    }
+
+    pid_t pid = bld_cc_params_async((const char **)params.data, params.count);
+
+    for (int i = 0; i < params.count; ++i) {
+        free(params.data[i]);
+    }
+
+    free(params.data);
+
+    return pid;
+}
+
+int
+bld_cc_pro(const char *out_name,
+           char **src,  int src_count,
+           char **libs, int lib_count,
+           char **inc,  int inc_count,
+           char **defs, int def_count,
+           char **warns, int warn_count,
+           char **raw,  int raw_count)
+{
+    return bld_wait_for(
+        bld_cc_pro_async(out_name,
+                         src,   src_count,
+                         libs,  lib_count,
+                         inc,   inc_count,
+                         defs,  def_count,
+                         warns, warn_count,
+                         raw,   raw_count)
+    );
+}
+
 int
 bld_contains(const char *str, int argc, char *argv[])
 {
@@ -491,7 +616,7 @@ bld_contains(const char *str, int argc, char *argv[])
 }
 
 int
-bld_find(const char *str, int count, const char **list)
+bld_find(const char *str, int count, char **list)
 {
     for (int i = 0; i < count; ++i) {
         if (bld_str_eq(list[i], str))
@@ -654,6 +779,22 @@ int
 bld_run_program(const char *name)
 {
     return bld_wait_for(bld_run_program_async(name));
+}
+
+void
+bld_sa_push_multiple(bld_sa_t *sa, char **data, int count)
+{
+    for (int i = 0; i < count; ++i) {
+        BLD_STRETCHY_PUSH(*sa, data[i]);
+    }
+}
+
+void
+bld_sa_push_multiple_nt(bld_sa_t *sa, char **data)
+{
+    for (int i = 0; data[i]; ++i) {
+        BLD_STRETCHY_PUSH(*sa, data[i]);
+    }
 }
 
 
