@@ -347,6 +347,28 @@ static inline float vec2_dot(vec2_t a, vec2_t b)
     return a.x * b.x + a.y * b.y;
 }
 
+typedef struct {
+    union {
+        int data[2];
+        struct { int x, y; };
+        struct { int u, v; };
+    };
+} ivec2_t;
+
+typedef struct {
+    union {
+        int data[3];
+        struct { int x, y, z; };
+    };
+} ivec3_t;
+
+typedef struct {
+    union {
+        int data[4];
+        struct { int x, y, z, w; };
+    };
+} ivec4_t;
+
 
 // TODO: Remove and create a custom random number gen.
 #include <stdint.h>
