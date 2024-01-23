@@ -545,32 +545,46 @@ bld_cc_pro_async(const char *out_name,
 
     bld_sa_t params = {0};
 
-    BLD_SA_PUSH(params, bld_strf("-o"));
-    // NOTE: Need to copy cuz we simply dealloc everithing and dont care.
-    BLD_SA_PUSH(params, bld_strf("%s", out_name));
-
-    for (int i = 0; i < src_count; ++i) {
-        BLD_SA_PUSH(params, bld_strf("%s", src[i]));
+    if (out_name) {
+        BLD_SA_PUSH(params, bld_strf("-o"));
+        // NOTE: Need to copy cuz we simply dealloc everithing and dont care.
+        BLD_SA_PUSH(params, bld_strf("%s", out_name));
     }
 
-    for (int i = 0; i < lib_count; ++i) {
-        BLD_SA_PUSH(params, bld_strf("-l%s", libs[i]));
+    if (src) {
+        for (int i = 0; i < src_count; ++i) {
+            BLD_SA_PUSH(params, bld_strf("%s", src[i]));
+        }
     }
 
-    for (int i = 0; i < inc_count; ++i) {
-        BLD_SA_PUSH(params, bld_strf("-I%s", inc[i]));
+    if (libs) {
+        for (int i = 0; i < lib_count; ++i) {
+            BLD_SA_PUSH(params, bld_strf("-l%s", libs[i]));
+        }
     }
 
-    for (int i = 0; i < def_count; ++i) {
-        BLD_SA_PUSH(params, bld_strf("-D%s", defs[i]));
+    if (inc) {
+        for (int i = 0; i < inc_count; ++i) {
+            BLD_SA_PUSH(params, bld_strf("-I%s", inc[i]));
+        }
     }
 
-    for (int i = 0; i < warn_count; ++i) {
-        BLD_SA_PUSH(params, bld_strf("-W%s", warns[i]));
+    if (defs) {
+        for (int i = 0; i < def_count; ++i) {
+            BLD_SA_PUSH(params, bld_strf("-D%s", defs[i]));
+        }
     }
 
-    for (int i = 0; i < raw_count; ++i) {
-        BLD_SA_PUSH(params, bld_strf("-R%s", raw[i]));
+    if (warns) {
+        for (int i = 0; i < warn_count; ++i) {
+            BLD_SA_PUSH(params, bld_strf("-W%s", warns[i]));
+        }
+    }
+
+    if (raw) {
+        for (int i = 0; i < raw_count; ++i) {
+            BLD_SA_PUSH(params, bld_strf("-R%s", raw[i]));
+        }
     }
 
     pid_t pid = bld_cc_params_async((const char **)params.data, params.count);
