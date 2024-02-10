@@ -2,6 +2,7 @@
 #define UTILS_H_
 
 #define LENGTH_OF(x) (sizeof(x)/sizeof(*x))
+#define ALIGNMENT_OF(...) _Alignof(__VA_ARGS__)
 
 
 //                                 why
@@ -47,6 +48,8 @@
 #else
     #define ASSERT(...) (1)
 #endif
+
+
 
 
 #include <stdint.h>

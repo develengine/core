@@ -305,6 +305,7 @@ typedef struct
         float data[2];
         struct { float x, y; };
         struct { float u, v; };
+        struct { float r, i; };
     };
 } vec2_t;
 
@@ -321,6 +322,22 @@ static inline vec2_t vec2_sub(vec2_t a, vec2_t b)
     return (vec2_t) {
         .x = a.x - b.x,
         .y = a.y - b.y,
+    };
+}
+
+static inline vec2_t vec2_mul(vec2_t a, vec2_t b)
+{
+    return (vec2_t) {
+        .x = a.x * b.x,
+        .y = a.y * b.y,
+    };
+}
+
+static inline vec2_t vec2_cmul(vec2_t a, vec2_t b)
+{
+    return (vec2_t) {
+        .r = a.r * b.r - a.i * b.i,
+        .i = a.r * b.i + a.i * b.r,
     };
 }
 
