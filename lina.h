@@ -57,6 +57,11 @@ static inline mat4_t mat4_transpose(mat4_t m)
  * static int __gluInvertMatrixd(const GLdouble m[16], GLdouble invOut[16])
  *
  * Contributed by David Moore (See Mesa bug #6748)
+ *
+ * SGI FREE SOFTWARE LICENSE B (Version 2.0, Sept. 18, 2008)
+ * Copyright (C) 1991-2000 Silicon Graphics, Inc. All Rights Reserved.
+ *
+ * http://oss.sgi.com/projects/FreeB/
  */
 static inline mat4_t mat4_inverse(mat4_t mat)
 {
