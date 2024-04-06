@@ -211,6 +211,10 @@ bld_sa_push_multiple_nt(bld_sa_t *sa, char **data);
                              "no-deprecated-declarations", "no-missing-field-initializers", \
                              "no-missing-braces"
 
+#if !defined(_WIN32)
+    #define BLD_WARNINGS BLD_GCC_WARNINGS
+#endif
+
 
 #define BLD_STRETCHY_T(data_type, size_type) struct { data_type *data; size_type count, capacity; }
 
@@ -256,7 +260,6 @@ do { \
 #if defined(BLD_IMPLEMENTATION)
 
 #if !defined(_WIN32)
-
 
 int
 bld_wait_for(pid_t pid)
