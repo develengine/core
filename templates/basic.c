@@ -27,6 +27,7 @@ main(int argc, char *argv[])
         "i32\n"
         "main(i32 argc, char *argv[])\n"
         "{\n"
+        "    BLD_TRY_REBUILD_SELF(argc, argv);\n"
         "    char *output = \"%s\";\n"
         "\n"
         "    bld_sa_t cc = {0};\n"
